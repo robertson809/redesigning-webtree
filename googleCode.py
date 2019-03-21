@@ -44,9 +44,14 @@ def main():
 
     # Make objective function
     objective = solver.Objective()
-    objective.SetCoefficient(x, 1)
-    objective.SetCoefficient(y, 10)
+    for row in range(len(mat)):
+        for col in range(len(mat[0])):
+             #we need to access all of this information
+             #we have the position of the student in the matrix, and the position of the class in the matrix
+             #we need to find the year and the major
+             objective.SetCoefficient(mat[row][col],weight(student_ids[row], course_crns[col]))
     objective.SetMaximization()
+
 
     """Solve the problem and print the solution."""
     result_status = solver.Solve()
@@ -72,14 +77,14 @@ def main():
 
 # get the weight of how "good" it is to give a student a class, based on its
 # position in the webtree ranking, the class year of the student, and their major
-def weight(student, class):
+def weight(student, class_crn):
     score = 0
-    if class in ranked[student]:
-        score += len(ranked[student]) - ranked[student].index(class)
+    if class_crn in ranked[student]:
+        score += len(ranked[student]) - ranked[student].index(class_crn)
     else:
         score -= float("inf")
 
-    score *= class
+    score *= class_crn
 
     for year in students_by_class:
         if student in students_by_class[year]:
@@ -93,7 +98,7 @@ def weight(student, class):
             else:
                 score *= 5
 
-    if course_major[class] in student_major[student]:
+    if course_major[class_crn] in student_major[student]:
         score *= 2
 
     return score
