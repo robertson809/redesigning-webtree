@@ -1,23 +1,43 @@
 from __future__ import print_function
 from ortools.linear_solver import pywraplp
+from baseline_webtree import read_file
+from array import *
 
 def main():
-  solver = pywraplp.Solver('SolveIntegerProblem',
-                           pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
-
-  # x and y are integer non-negative variables.
-  x = solver.IntVar(0.0, solver.infinity(), 'x')
-  y = solver.IntVar(0.0, solver.infinity(), 'y')
-
-  # x + 7 * y <= 17.5
-  constraint1 = solver.Constraint(-solver.infinity(), 17.5)
-  constraint1.SetCoefficient(x, 1)
-  constraint1.SetCoefficient(y, 7)
-
-  # x <= 3.5
-  constraint2 = solver.Constraint(-solver.infinity(), 3.5)
-  constraint2.SetCoefficient(x, 1)
-  constraint2.SetCoefficient(y, 0)
+  solver = pywraplp.Solver('SolveIntegerProblem', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
+  
+  student_requests, students_by_class, courses = read_file('testWB2.csv')
+  num_students = len(student_requests)
+  num_classes = len(courses)
+  print(courses)
+  
+  #mat is a list of lists (2d matrix) of all the possible student class pairings
+  mat = []
+  #we want a variable for each possible student class pairing
+  for i in range(0, num_students):
+      mat.append([])
+      for j in range(0,num_classes):
+          mat[i].append(solver.IntVar(0.0, 1.0, str(i)+str(j)))
+  
+  #constrain that each student must have between 0 and 4 classes
+  constraints = []
+  for row in range(len(mat)):
+      constraints.append(solver.Constraint(0.0, 4.0))
+      for col in range(len(mat[0])):
+          constraints[row].SetCoefficient(mat[row][col], 1.0)
+  
+  #get a ordered lists of course capacities
+  course_capacities = []
+  for course in courses:
+      course_capacities.append(courses[course])
+  
+  #constrain that each course must not overflow its capacity
+  for col in range(len(mat[0])):
+      constraints.append(solver.Constraint(0.0, course_capacities[col]))
+      for row in range(len(mat)):
+          constraints[col].SetCoefficient(mat[row][col], 1.0)
+          
+      
 
   # Maximize x + 10 * y.
   objective = solver.Objective()
