@@ -34,6 +34,9 @@ class Student:
         str_rep += "}"
         return str_rep
 
+    def get_requests(self):
+        return self.requests
+
     def add_request(self, crn, tree, branch):
         """Adds the supplied WebTree request to this student's record.
 
@@ -80,7 +83,7 @@ class Student:
 
         if (tree == 0) or (branch == 0):
             raise Exception("This should never happen!")
-        
+
         if got_last_class: # stay along same path if possible
             if (tree <= 3) and (branch <= 3):
                 self._next_course = (tree, branch*2)
@@ -121,7 +124,7 @@ class Student:
         """
         tree = self._next_course[0]
         branch = self._next_course[1]
-        
+
         if (tree == 0) or (branch == 0):
             raise Exception("This should never happen!")
 
@@ -133,9 +136,3 @@ class Student:
             self._next_course = (tree + 1, 1)
         else: # next node in current tree in level order
             self._next_course = (tree, branch + 1)
-                
-                
-            
-                
-            
-    
