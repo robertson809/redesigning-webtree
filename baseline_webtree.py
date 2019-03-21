@@ -26,6 +26,8 @@ def read_file(filename):
                              'SOPH': set([]), 'FRST': set([]),
                              'OTHER': set([])}
         courses = {}
+        course_major = {}
+        student_major = {}
         reader.next() # consume the first line, which is just column headers
 
         for row in reader:
@@ -34,6 +36,9 @@ def read_file(filename):
             crn = int(row['CRN'])
             tree = int(row['TREE'])
             branch = int(row['BRANCH'])
+            department = row['SUBJ']
+            major1 = row['MAJOR']
+            major2 = row['MAJOR2']
             if id in student_requests: # does this student already exist?
                 student_requests[id].add_request(crn, tree, branch)
             else: # nope, create a new record
@@ -43,8 +48,10 @@ def read_file(filename):
 
             students_by_class[class_year].add(id)
             courses[crn] = int(row['COURSE_CEILING'])
+            course_major[crn] = department
+            student_major[id] = [major1, major2]
 
-    return student_requests, students_by_class, courses
+    return student_requests, students_by_class, courses, course_major, student_major
 
 
 def assign_random_numbers(students_by_class):

@@ -1,16 +1,18 @@
 from __future__ import print_function
 from ortools.linear_solver import pywraplp
-from baseline_webtree import read_file
-from array import *
+from baseline_webtree import read_file, student_choices
 
 def main():
   solver = pywraplp.Solver('SolveIntegerProblem', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
   
-  student_requests, students_by_class, courses = read_file('testWB2.csv')
+  student_requests, students_by_class, courses, course_major, student_major = read_file('testWB2.csv')
   num_students = len(student_requests)
   num_classes = len(courses)
-  print(courses)
-  
+  #get a list of choices
+  ranked = student_choices(student_requests)
+  print(course_major)
+  print(student_major)
+  return
   #mat is a list of lists (2d matrix) of all the possible student class pairings
   mat = []
   #we want a variable for each possible student class pairing
@@ -37,9 +39,9 @@ def main():
       for row in range(len(mat)):
           constraints[col].SetCoefficient(mat[row][col], 1.0)
           
-      
+  
 
-  # Maximize x + 10 * y.
+  # Make objective function
   objective = solver.Objective()
   objective.SetCoefficient(x, 1)
   objective.SetCoefficient(y, 10)
@@ -65,6 +67,21 @@ def main():
 
   for variable in variable_list:
     print('%s = %d' % (variable.name(), variable.solution_value()))
+    
+  
+#get the weight of how "good" it is to give a student a class, based on its
+#position in the webtree ranking, the class year of the student, and their major    
+# def weight(student, class, year, major):
+#     score = 0
+#     if class in ranked[student]:
+#         score += len(ranked[student]) - ranked[student].index(class)
+#     else:
+#         score -= float("inf")
+#
+#     score *= class
+#
+#     if
+    
 
 if __name__ == '__main__':
   main()
