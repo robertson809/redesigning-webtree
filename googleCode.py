@@ -2,7 +2,7 @@ from __future__ import print_function
 from ortools.linear_solver import pywraplp
 from baseline_webtree import read_file, student_choices
 
-student_requests, students_by_class, courses, course_major, student_major = read_file('testWB2.csv')
+student_requests, students_by_class, courses, course_major, student_major = read_file('spring-2015.csv')
 num_students = len(student_requests)
 num_classes = len(courses)
 
@@ -49,30 +49,30 @@ def main():
              #we need to access all of this information
              #we have the position of the student in the matrix, and the position of the class in the matrix
              #we need to find the year and the major
-             objective.SetCoefficient(mat[row][col],weight(student_ids[row], course_crns[col]))
+             objective.SetCoefficient(mat[row][col], weight(student_ids[row],  course_crns[col]))
     objective.SetMaximization()
 
 
     """Solve the problem and print the solution."""
     result_status = solver.Solve()
     # The problem has an optimal solution.
-    assert result_status == pywraplp.Solver.OPTIMAL
+    # assert result_status == pywraplp.Solver.OPTIMAL
 
     # The solution looks legit (when using solvers other than
     # GLOP_LINEAR_PROGRAMMING, verifying the solution is highly recommended!).
-    assert solver.VerifySolution(1e-7, True)
+    # assert solver.VerifySolution(1e-7, True)
 
-    print('Number of variables =', solver.NumVariables())
-    print('Number of constraints =', solver.NumConstraints())
+    # print('Number of variables =', solver.NumVariables())
+    # print('Number of constraints =', solver.NumConstraints())
 
     # The objective value of the solution.
-    print('Optimal objective value = %d' % solver.Objective().Value())
-    print()
+    # print('Optimal objective value = %d' % solver.Objective().Value())
+    # print()
     # The value of each variable in the solution.
-    variable_list = [x, y]
-
-    for variable in variable_list:
-        print('%s = %d' % (variable.name(), variable.solution_value()))
+    # variable_list = [x, y]
+    #
+    # for variable in variable_list:
+    #     print('%s = %d' % (variable.name(), variable.solution_value()))
 
 
 # get the weight of how "good" it is to give a student a class, based on its
