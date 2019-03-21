@@ -5,11 +5,20 @@ from baseline_webtree import read_file, student_choices
 def main():
   solver = pywraplp.Solver('SolveIntegerProblem', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
   
+  
+  # a) A dictionary mapping student IDs to records, where each record
+#      contains information about that student's WebTree requests.
+#   b) A dictionary mapping class years to student IDs, indicating
+#      which students are seniors, juniors, etc.
+#   c) A dictionary mapping course CRNs to enrollment capacities.
   student_requests, students_by_class, courses, course_major, student_major = read_file('testWB2.csv')
   num_students = len(student_requests)
   num_classes = len(courses)
   #get a list of choices
   ranked = student_choices(student_requests)
+  #get a list of student IDs and courses
+  student_ids = list(student_requests.keys())
+  course_crns = list(couses.keys())
   print(course_major)
   print(student_major)
   return
@@ -19,6 +28,7 @@ def main():
   for i in range(0, num_students):
       mat.append([])
       for j in range(0,num_classes):
+          #we can reuse these for the objective function
           mat[i].append(solver.IntVar(0.0, 1.0, str(i)+str(j)))
   
   #constrain that each student must have between 0 and 4 classes
@@ -32,6 +42,8 @@ def main():
   course_capacities = []
   for course in courses:
       course_capacities.append(courses[course])
+      
+  
   
   #constrain that each course must not overflow its capacity
   for col in range(len(mat[0])):
@@ -43,8 +55,12 @@ def main():
 
   # Make objective function
   objective = solver.Objective()
-  objective.SetCoefficient(x, 1)
-  objective.SetCoefficient(y, 10)
+  for row in range(len(mat)):
+      for col in range(len(mat[0])):
+          #we need to access all of this information
+          #we have the position of the student in the matrix, and the position of the class in the matrix
+          #we need to find the year and the major
+          objective.SetCoefficient(mat[row][col],weight(student_ids[row], course_crns[col], year, major))
   objective.SetMaximization()
 
   """Solve the problem and print the solution."""
