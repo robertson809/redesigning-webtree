@@ -154,7 +154,7 @@ def run_webtree(student_requests, students_by_class, courses, random_ordering):
 
     return assignments
 
-
+#returns a dictionary from student ID to a list of their 48 choices
 def student_choices(student_requests):
     ranked = {}
     for student in student_requests:
