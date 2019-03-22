@@ -42,7 +42,7 @@ def read_file(filename):
             if id in student_requests: # does this student already exist?
                 student_requests[id].add_request(crn, tree, branch)
             else: # nope, create a new record
-                s = Student(id, class_year)
+                s = Student(id, class_year, major1)
                 s.add_request(crn, tree, branch)
                 student_requests[id] = s
 
@@ -207,8 +207,7 @@ def main():
         return
 
     # Read in data
-    student_requests, students_by_class, courses = read_file(sys.argv[1])
-    print student_choices(student_requests)
+    student_requests, students_by_class, courses, course_major, student_major = read_file(sys.argv[1])
 
     # Assign random numbers
     random_ordering = assign_random_numbers(students_by_class)
@@ -218,11 +217,19 @@ def main():
                               courses, random_ordering)
 
     # Print results to stdout
-    # for id in assignments:
-    #     print id,
-    #     for course in assignments[id]:
-    #         print course,
-    #     print
+    first_choices = 0
+    for id in assignments:
+        # print id,
+        # for course in assignments[id]:
+            # print course,
+        # print
+
+        if (1, 1) in student_requests[id].get_requests():
+            if student_requests[id].get_requests()[(1, 1)] in assignments[id]:
+                first_choices += 1
+
+    print "First Choices"
+    print first_choices, len(assignments), float(first_choices)/len(assignments)
 
 
 if __name__ == "__main__":

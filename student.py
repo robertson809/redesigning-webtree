@@ -10,7 +10,7 @@ class Student:
         requests - a list of 3-tuples representing the student's
                    WebTree requests.
     """
-    def __init__(self, id, class_year):
+    def __init__(self, id, class_year, major):
         """Constructs a new student record with specified attributes.
 
         Parameters:
@@ -18,6 +18,7 @@ class Student:
             class - this student's class (a string).
         """
         self.id = id
+        self.major = major
         self.class_year = class_year
         self._next_course = (1, 1)
         self.requests = {}

@@ -74,21 +74,45 @@ def main():
     #
     # for variable in variable_list:
     #     print('%s = %d' % (variable.name(), variable.solution_value()))
-    # for row in range(len(mat)):
-    #     for col in range(len(mat[0])):
-    #         variable = mat[row][col]
-    #         print('%s = %d' % (variable.name(), variable.solution_value()))
+
+    assignments = {}
+    for row in range(len(mat)):
+        for col in range(len(mat[0])):
+            variable = mat[row][col]
+            split = variable.name().split()
+            name = int(split[0])+1
+            course_index = int(split[1])
+            val = variable.solution_value()
+            if val:
+                if name in assignments:
+                    assignments[name].add(course_crns[course_index])
+                else:
+                    assignments[name] = set([course_crns[course_index]])
+
+    # Print course assignments
+    # for s in assignments:
+    #     print(s, list(assignments[s]))
+
+    first_choices = 0
+    for s in ranked:
+        if ranked[s][0][0] in list(assignments[s]):
+            first_choices += 1
+    print("First Choices")
+    print(first_choices, num_students, float(first_choices)/num_students)
 
 # get the weight of how "good" it is to give a student a class, based on its
 # position in the webtree ranking, the class year of the student, and their major
 def weight(student, class_crn):
     score = 0
-    if class_crn in ranked[student]:
-        score += len(ranked[student]) - ranked[student].index(class_crn)
-    else:
-        score -= 10000
 
-    score *= class_crn
+    found = False
+    for four_classes in ranked[student]:
+        if class_crn in four_classes:
+            found = True
+            score += len(ranked[student]) - ranked[student].index(four_classes)
+            break
+    if not found:
+        score -= 10000
 
     for year in students_by_class:
         if student in students_by_class[year]:
@@ -101,6 +125,7 @@ def weight(student, class_crn):
                 score *= 4
             else:
                 score *= 5
+            break
 
     if course_major[class_crn] in student_major[student]:
         score *= 2
