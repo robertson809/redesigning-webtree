@@ -1,11 +1,15 @@
 from __future__ import print_function
 from ortools.linear_solver import pywraplp
-from baseline_webtree import read_file, student_choices
+from baseline_webtree import read_file, student_choices, assign_random_numbers, run_webtree
+import time, sys
 
-student_requests, students_by_class, courses, course_major, student_major = read_file('spring-2015.csv')
+
+
+student_requests, students_by_class, courses, course_major, student_major = read_file(sys.argv[1])
 num_students = len(student_requests)
 num_classes = len(courses)
 
+                              
 #get a list of choices
 ranked = student_choices(student_requests)
 # student IDs
@@ -14,7 +18,27 @@ student_ids = list(student_requests.keys())
 course_crns = list(courses.keys())
 
 def main():
-    optimize()
+    start = time.time()
+    assignments = optimize()
+    finish = time.time()
+    print('running time is ',  finish - start)
+    
+    first_choices = 0
+    for s in ranked:
+        if ranked[s][0][0] in list(assignments[s]):
+            first_choices += 1
+    second_choices = 0
+    for s in ranked:
+        if ranked[s][0][1] in list(assignments[s]):
+            second_choices += 1
+            
+    
+            
+    print("Improved First Choices")
+    print(first_choices, num_students, float(first_choices)/num_students)
+    
+    print("Second Choices")
+    print(second_choices, num_students, float(second_choices)/num_students)
 def optimize():
     solver = pywraplp.Solver('SolveIntegerProblem', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
 
@@ -29,7 +53,7 @@ def optimize():
     #constrain that each student must have between 0 and 4 classes
     constraints = []
     for row in range(len(mat)):
-        constraints.append(solver.Constraint(0.0, 4.0))
+        constraints.append(solver.Constraint(2.0, 4.0))
         for col in range(len(mat[0])):
             constraints[row].SetCoefficient(mat[row][col], 1.0)
 
@@ -94,22 +118,8 @@ def optimize():
                     assignments[name].add(course_crns[course_index])
                 else:
                     assignments[name] = set([course_crns[course_index]])
-
-    # Print course assignments
-    # for s in assignments:
-    #     print(s, list(assignments[s]))
-
-    first_choices = 0
-    for s in ranked:
-        if ranked[s][0][0] in list(assignments[s]):
-            first_choices += 1
-    print("First Choices")
-    print(first_choices, num_students, float(first_choices)/num_students)
-    
     #a dictionary from student ids to four courses they're assigned
     return assignments
-
-    
 
 # get the weight of how "good" it is to give a student a class, based on its
 # position in the webtree ranking, the class year of the student, and their major
@@ -120,7 +130,7 @@ def weight(student, class_crn):
     for four_classes in ranked[student]:
         if class_crn in four_classes:
             found = True
-            score += (len(ranked[student]) - ranked[student].index(four_classes)) * (4-four_classes.index(class_crn))
+            score += (len(ranked[student]) - ranked[student].index(four_classes)) * (4 - four_classes.index(class_crn))
             break
     if not found:
         score -= 10000
@@ -138,8 +148,8 @@ def weight(student, class_crn):
                 score *= 5
             break
 
-    if course_major[class_crn] in student_major[student]:
-        score *= 2
+    #if course_major[class_crn] in student_major[student]:
+        #score *= 2
 
     return score
 

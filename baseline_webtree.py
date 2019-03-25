@@ -154,7 +154,7 @@ def run_webtree(student_requests, students_by_class, courses, random_ordering):
 
     return assignments
 
-#returns a dictionary from student ID to a list of their 48 choices
+#returns a dictionary from student ID to a list of their ranked 48 choices
 def student_choices(student_requests):
     ranked = {}
     for student in student_requests:
@@ -218,6 +218,7 @@ def main():
 
     # Print results to stdout
     first_choices = 0
+    second_choices = 0
     for id in assignments:
         # print id,
         # for course in assignments[id]:
@@ -227,9 +228,14 @@ def main():
         if (1, 1) in student_requests[id].get_requests():
             if student_requests[id].get_requests()[(1, 1)] in assignments[id]:
                 first_choices += 1
+        if (1, 2) in student_requests[id].get_requests():
+            if student_requests[id].get_requests()[(1, 2)] in assignments[id]:
+                second_choices += 1
 
     print "First Choices"
     print first_choices, len(assignments), float(first_choices)/len(assignments)
+    print "Second Choices"
+    print second_choices, len(assignments), float(second_choices)/len(assignments)
 
 
 if __name__ == "__main__":
