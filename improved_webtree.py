@@ -2,6 +2,7 @@ from __future__ import print_function
 from ortools.linear_solver import pywraplp
 from baseline_webtree import read_file, student_choices, assign_random_numbers, run_webtree
 import time, sys
+WT_CHOICE_LEN = 48
 
 
 
@@ -10,8 +11,9 @@ num_students = len(student_requests)
 num_classes = len(courses)
 
                               
-#get a list of choices
+#a dictionary from student ID to a list of their ranked 48 choices
 ranked = student_choices(student_requests)
+
 # student IDs
 student_ids = list(student_requests.keys())
 # course CRNs
@@ -40,57 +42,101 @@ def main():
     print("Second Choices")
     print(second_choices, num_students, float(second_choices)/num_students)
 def optimize():
+    print(ranked)
+    #import glop, the integer programming solver
     solver = pywraplp.Solver('SolveIntegerProblem', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
 
-    #mat is a list of lists (2d matrix) of all the possible student class pairings
+    #mat is a list of lists (3d matrix) of all the possible student class pairings
+    #the students are ordered by their IDs and the CRNs are ordered by their order from
+    #courses
     mat = []
     #we want a variable for each possible student class pairing
-    for i in range(0, num_students):
+    for std in range(0, num_students):
         mat.append([])
-        for j in range(0, num_classes):
-            mat[i].append(solver.IntVar(0.0, 1.0, str(i)+" "+str(j)))
+        print("student", std)
+        for class_num in range(0, num_classes):
+            print("class", class_num)
+            mat[std].append([])
+            #if(variable is in the right ranked choice for the student, let it take on a 1 value)
+            choice_num = 0
+            for four_classes in ranked[std+1]:
+                choice_num += 1
+                if course_crns[class_num] in four_classes: 
+                    print (str(std)+" "+str(class_num) +" "+ str(choice_num))
+                    mat[std][class_num].append(solver.IntVar(0.0, 1.0, str(std)+" "+str(class_num) +" "+ str(choice_num)))
+                else:
+                    mat[std][class_num].append(None)
+        print(mat)
+    
 
-    #constrain that each student must have between 0 and 4 classes
-    constraints = []
-    for row in range(len(mat)):
-        constraints.append(solver.Constraint(2.0, 4.0))
-        for col in range(len(mat[0])):
-            constraints[row].SetCoefficient(mat[row][col], 1.0)
+    #####################CONSTRAINT 1, STUDENT CLASSES FROM 2 to 4 ###########################
+    #constrain that each student must have between 2 and 4 classes
+    #\sum_j=0^{num_classes}, k=0^{48} < 4
+    stud_constraint = []
+    for row in range(num_students):
+        stud_constraint.append(solver.Constraint(2.0, 4.0))
+        #add the weights to the linear terms of constraint student [row]
+        for col in range(num_classes):
+            for dep in range(WT_CHOICE_LEN):
+                #sum of all the classes and position binary numbers is less than 4, weighted with 1
+                #mat[row][col][depth] is the corresponding variable
+                if mat[row][col][dep] is not None:
+                    stud_constraint[row].SetCoefficient(mat[row][col][dep], 1.0)
+  
 
+    #####################CONSTRAINT 2, CLASS OCCUPANCY FROM 0 to CAPACITY ###########################
+    #constraint that each course must not overflow its capacity
     #get a ordered lists of course capacities using the CRN to capacity dictionary
     course_capacities = []
     for course in courses:
         course_capacities.append(courses[course])
 
-    #constraint that each course must not overflow its capacity
-    #make sure we pick up where we left off with shift
-    shift = len(constraints)
-    for col in range(len(mat[0])):
-        constraints.append(solver.Constraint(0.0, course_capacities[col]))
-        for row in range(len(mat)):
-            constraints[shift+col].SetCoefficient(mat[row][col], 1.0)
-            
+    cor_constraint = []
+    #don't need to actually save the constraints beyond adding weighted coefficients to them
+    #for all classes j /sum_i = 0 ^{num_students}, k=0^{48} C_ijk < capacity
+    for col in range(num_classes):
+        cor_constraint.append(solver.Constraint(0.0, course_capacities[col]))
+        for row in range(num_students):
+            for dep in range(WT_CHOICE_LEN):
+                #sum of binary number for a corse over all students and lists cannot get over
+                #course capacity = course_capacities[col], mat[row][col][dep] is binary variable
+                if mat[row][col][dep] is not None:
+                    cor_constraint[col].SetCoefficient(mat[row][col][dep], 1.0)
+    
+
+    #####################CONSTRAINT 3, COURSES MUST COME FROM SAME WT 'CHOICE' ####################
     #constraint that the four courses must come from the same webtree "selection"
+    sel_constraint = []
+    #for all lists k /sum_{i = 0} ^{num_students}, _j=0^{num_classes}
+    for std in range(num_students):
+        sel_constraint.append(solver.Constraint(4,4))
+            for choice in range(WT_CHOICE_LEN):
+                if mat[std][class_num][choice] is not None:
+                    sel_constraint[dep].SetCoefficient(mat[row][col][dep], 1.0)
+        
     
     # Make objective function
     objective = solver.Objective()
-    for row in range(len(mat)):
-        for col in range(len(mat[0])):
+    for row in range(num_students):
+        for col in range(num_classes):
+            for dep in range(WT_CHOICE_LEN):
             #we need to access all of this information
             #we have the position of the student in the matrix, and the position of the class in the matrix
             #we need to find the year and the major
-            objective.SetCoefficient(mat[row][col], weight(student_ids[row], course_crns[col]))
+                if mat[row][col][dep] is not None:
+                    objective.SetCoefficient(mat[row][col][dep], weight(student_ids[row], course_crns[col]))
     objective.SetMaximization()
-
-
+    
+    
     """Solve the problem and print the solution."""
     result_status = solver.Solve()
+    print ('henlo')  
     # The problem has an optimal solution.
-    assert result_status == pywraplp.Solver.OPTIMAL
+    #assert result_status == pywraplp.Solver.OPTIMAL
 
     # The solution looks legit (when using solvers other than
     # GLOP_LINEAR_PROGRAMMING, verifying the solution is highly recommended!).
-    assert solver.VerifySolution(1e-7, True)
+    #assert solver.VerifySolution(1e-7, True)
 
     print('Number of variables =', solver.NumVariables())
     print('Number of constraints =', solver.NumConstraints())
@@ -98,26 +144,24 @@ def optimize():
     # The objective value of the solution.
     print('Optimal objective value = %d' % solver.Objective().Value())
     print()
-    # The value of each variable in the solution.
-    # variable_list = [x, y]
-    #
-    # for variable in variable_list:
-    #     print('%s = %d' % (variable.name(), variable.solution_value()))
+    
+    
 
     #dictionary from student id to four courses they're assigned
     assignments = {}
     for row in range(len(mat)):
         for col in range(len(mat[0])):
-            variable = mat[row][col]
-            split = variable.name().split()
-            name = int(split[0])+1
-            course_index = int(split[1])
-            val = variable.solution_value()
-            if val:
-                if name in assignments:
-                    assignments[name].add(course_crns[course_index])
-                else:
-                    assignments[name] = set([course_crns[course_index]])
+            for dep in range(WT_CHOICE_LEN):
+                variable = mat[row][col][dep]
+                split = variable.name().split()
+                name = int(split[0])+1
+                course_index = int(split[1])
+                val = variable.solution_value()
+                if val:
+                    if name in assignments:
+                        assignments[name].add(course_crns[course_index])
+                    else:
+                        assignments[name] = set([course_crns[course_index]])
     #a dictionary from student ids to four courses they're assigned
     return assignments
 
@@ -147,9 +191,6 @@ def weight(student, class_crn):
             else:
                 score *= 5
             break
-
-    #if course_major[class_crn] in student_major[student]:
-        #score *= 2
 
     return score
 
