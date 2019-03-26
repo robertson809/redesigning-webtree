@@ -53,20 +53,17 @@ def optimize():
     #we want a variable for each possible student class pairing
     for std in range(0, num_students):
         mat.append([])
-        print("student", std)
         for class_num in range(0, num_classes):
-            print("class", class_num)
             mat[std].append([])
             #if(variable is in the right ranked choice for the student, let it take on a 1 value)
             choice_num = 0
             for four_classes in ranked[std+1]:
                 choice_num += 1
                 if course_crns[class_num] in four_classes: 
-                    print (str(std)+" "+str(class_num) +" "+ str(choice_num))
                     mat[std][class_num].append(solver.IntVar(0.0, 1.0, str(std)+" "+str(class_num) +" "+ str(choice_num)))
                 else:
                     mat[std][class_num].append(None)
-        print(mat)
+       
     
 
     #####################CONSTRAINT 1, STUDENT CLASSES FROM 2 to 4 ###########################
@@ -110,9 +107,9 @@ def optimize():
     #for all lists k /sum_{i = 0} ^{num_students}, _j=0^{num_classes}
     for std in range(num_students):
         sel_constraint.append(solver.Constraint(4,4))
-            for choice in range(WT_CHOICE_LEN):
-                if mat[std][class_num][choice] is not None:
-                    sel_constraint[dep].SetCoefficient(mat[row][col][dep], 1.0)
+        for choice in range(WT_CHOICE_LEN):
+            if mat[std][class_num][choice] is not None:
+                sel_constraint[dep].SetCoefficient(mat[row][col][dep], 1.0)
         
     
     # Make objective function
@@ -174,7 +171,7 @@ def weight(student, class_crn):
     for four_classes in ranked[student]:
         if class_crn in four_classes:
             found = True
-            score += (len(ranked[student]) - ranked[student].index(four_classes)) * (4 - four_classes.index(class_crn))
+            score += (len(ranked[student]) - ranked[student].index(four_classes)) * ( - four_classes.index(class_crn))
             break
     if not found:
         score -= 10000
