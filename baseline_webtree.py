@@ -216,20 +216,123 @@ def main():
     assignments = run_webtree(student_requests, students_by_class,
                               courses, random_ordering)
 
-    # Print results to stdout
+    ranked = student_choices(student_requests)
+
+
     first_choices = 0
-    for id in assignments:
-        # print id,
-        # for course in assignments[id]:
-            # print course,
-        # print
-
-        if (1, 1) in student_requests[id].get_requests():
-            if student_requests[id].get_requests()[(1, 1)] in assignments[id]:
-                first_choices += 1
-
+    pop = 0
+    for s in ranked:
+        if ranked[s][0][0] in list(assignments[s]):
+            first_choices += 1
+        if ranked[s][0][0] != None:
+            pop += 1
     print "First Choices"
-    print first_choices, len(assignments), float(first_choices)/len(assignments)
+    print first_choices, pop, float(first_choices)/pop
+
+    second_choices = 0
+    pop = 0
+    for s in ranked:
+        if ranked[s][0][1] in list(assignments[s]):
+            second_choices += 1
+        if ranked[s][0][0] != None:
+            pop += 1
+    print "Second Choices"
+    print second_choices, pop, float(second_choices)/pop
+
+    third_choices = 0
+    pop = 0
+    for s in ranked:
+        if ranked[s][0][2] in list(assignments[s]):
+            third_choices += 1
+        if ranked[s][0][0] != None:
+            pop += 1
+    print "Third Choices"
+    print third_choices, pop, float(third_choices)/pop
+
+    fourth_choices = 0
+    pop = 0
+    for s in ranked:
+        if ranked[s][0][3] in list(assignments[s]):
+            fourth_choices += 1
+        if ranked[s][0][0] != None:
+            pop += 1
+    print "Fourth Choices"
+    print fourth_choices, pop, float(fourth_choices)/pop
+
+    # First choice was a class in student's major
+    major_choices = 0
+    pop = 0
+    for s in ranked:
+        first_choice = ranked[s][0][0]
+        major = student_major[s]
+        if 'X' in major[0]:
+            major[0] = major[0][1:]
+        if "UND" in major or "XUND" in major:
+            continue
+        if first_choice != None and course_major[first_choice] in major:
+            pop += 1
+            if first_choice in list(assignments[s]):
+                major_choices += 1
+    print "Major First Choice"
+    print major_choices, pop, float(major_choices)/pop
+
+    # Second choice was a class in student's major
+    major_choices = 0
+    pop = 0
+    for s in ranked:
+        second_choice = ranked[s][0][1]
+        major = student_major[s]
+        if 'X' in major[0]:
+            major[0] = major[0][1:]
+        if "UND" in major or "XUND" in major:
+            continue
+        if second_choice != None and course_major[second_choice] in major:
+            pop += 1
+            if second_choice in list(assignments[s]):
+                major_choices += 1
+
+    print "Major Second Choice"
+    print major_choices, pop, float(major_choices)/pop
+
+    first_choices_seniors = 0
+    seniors = 0
+    for s in ranked:
+        if s in students_by_class["SENI"]:
+            seniors += 1
+            if ranked[s][0][0] in list(assignments[s]):
+                first_choices_seniors += 1
+    print "First Choices Seniors"
+    print first_choices_seniors, seniors, float(first_choices_seniors)/seniors
+
+    first_choices_juniors = 0
+    juniors = 0
+    for s in ranked:
+        if s in students_by_class["JUNI"]:
+            juniors += 1
+            if ranked[s][0][0] in list(assignments[s]):
+                first_choices_juniors += 1
+    print "First Choices Juniors"
+    print first_choices_juniors, juniors, float(first_choices_juniors)/juniors
+
+    first_choices_sophs = 0
+    sophs = 0
+    for s in ranked:
+        if s in students_by_class["SOPH"]:
+            sophs += 1
+            if ranked[s][0][0] in list(assignments[s]):
+                first_choices_sophs += 1
+    print "First Choices Sophomores"
+    print first_choices_sophs, sophs, float(first_choices_sophs)/sophs
+
+    first_choices_fresh = 0
+    fresh = 0
+    for s in ranked:
+        if s in students_by_class["FRST"]:
+            fresh += 1
+            if ranked[s][0][0] in list(assignments[s]):
+                first_choices_fresh += 1
+    print "First Choices Freshmen"
+    print first_choices_fresh, fresh, float(first_choices_fresh)/fresh
 
 
 if __name__ == "__main__":
