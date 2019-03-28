@@ -14,8 +14,7 @@ num_classes = len(courses)
 #a dictionary from student ID to a list of their ranked 48 choices
 ranked = student_choices(student_requests)
 
-# student IDs
-student_ids = list(student_requests.keys())
+# student IDsc_requests.keys())
 # course CRNs
 course_crns = list(courses.keys())
 
