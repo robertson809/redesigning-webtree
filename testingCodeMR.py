@@ -95,6 +95,7 @@ def main():
     #     print(s, list(assignments[s]))
 
     first_choices = 0
+    
     pop = 0
     for s in ranked:
         if ranked[s][0][0] in list(assignments[s]):
@@ -151,6 +152,14 @@ def main():
 
     print("Major First Choice")
     print(major_choices, pop, float(major_choices)/pop)
+    
+    print("1r, 2r, 3r, 4r, Mr", sys.argv[1])
+    print(float(first_choices)/pop)
+    print(float(second_choices)/pop)
+    print(float(third_choices)/pop)
+    print(float(fourth_choices)/pop)
+    print(float(major_choices)/pop)
+    
 
     # Second choice was a class in student's major
     major_choices = 0
@@ -220,8 +229,8 @@ def weight(student, class_crn):
     for four_classes in ranked[student]:
         if class_crn in four_classes:
             found = True
-            i = 4-four_classes.index(class_crn)
-            score += poly_map(((len(ranked[student]) - ranked[student].index(four_classes)) * i))   
+            i = (4-four_classes.index(class_crn)) * 12
+            score += log_48(len(ranked[student] - ranked[student].index(four_classes)) * log_48(i)   
             break
     if not found:
         score -= 10000
@@ -249,7 +258,8 @@ def weight(student, class_crn):
     #interpolating f(192) = 192, 
 def poly_map(x):
     return (13.0/2478.0) * (x ** 2) - (31.0/2478.0)*x + (416.0/413.0)
-def logistic_map(x):
-    return 192.0/(1 + math.exp(-0.05*(x-96.0)))
+    #using a logistic function
+def log_48(x):
+    return 48.0/(1 + math.exp(-0.25*(x-35.0)))
 if __name__ == '__main__':
     main()
