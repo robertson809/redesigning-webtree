@@ -259,7 +259,8 @@ def weight(student, class_crn):
 def poly_map(x):
     return (13.0/2478.0) * (x ** 2) - (31.0/2478.0)*x + (416.0/413.0)
     #using a logistic function
+    #https://www.desmos.com/calculator/5kggnehdh1
 def log_48(x):
-    return 48.0/(1 + math.exp(-0.25*(x-35.0)))
+    return 48.0/(1 + math.exp(-0.5*(x-37.0)))
 if __name__ == '__main__':
     main()
