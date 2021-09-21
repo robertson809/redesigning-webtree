@@ -28,7 +28,7 @@ def read_file(filename):
         courses = {}
         course_major = {}
         student_major = {}
-        reader.next() # consume the first line, which is just column headers
+        next(reader) # consume the first line, which is just column headers
 
         for row in reader:
             id = int(row['ID'])
@@ -195,15 +195,15 @@ def student_choices(student_requests):
 
 def main():
     if (len(sys.argv) != 2):
-        print
-        print "***********************************************************"
-        print "You need to supply a .csv file containing the WebTree data"
-        print "as a command-line argument."
-        print
-        print "Example:"
-        print "    python baseline_webtree.py spring-2015.csv"
-        print "***********************************************************"
-        print
+        print()
+        print ("***********************************************************")
+        print ("You need to supply a .csv file containing the WebTree data")
+        print ("as a command-line argument.")
+        print()
+        print ("Example:")
+        print ("    python baseline_webtree.py spring-2015.csv")
+        print ("***********************************************************")
+        print()
         return
 
     # Read in data
@@ -232,10 +232,10 @@ def main():
             if student_requests[id].get_requests()[(1, 2)] in assignments[id]:
                 second_choices += 1
 
-    print "First Choices"
-    print first_choices, len(assignments), float(first_choices)/len(assignments)
-    print "Second Choices"
-    print second_choices, len(assignments), float(second_choices)/len(assignments)
+    print ("First Choices")
+    print (first_choices, len(assignments), float(first_choices)/len(assignments))
+    print ("Second Choices")
+    print (second_choices, len(assignments), float(second_choices)/len(assignments))
 
 
 if __name__ == "__main__":
