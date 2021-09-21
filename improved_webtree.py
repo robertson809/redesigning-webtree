@@ -14,7 +14,8 @@ num_classes = len(courses)
 #a dictionary from student ID to a list of their ranked 48 choices
 ranked = student_choices(student_requests)
 
-# student IDsc_requests.keys())
+# student IDs
+student_ids = list(student_requests.keys())
 # course CRNs
 course_crns = list(courses.keys())
 
@@ -41,7 +42,7 @@ def main():
     print("Second Choices")
     print(second_choices, num_students, float(second_choices)/num_students)
 def optimize():
-    print(ranked)
+    # print(ranked)
     #import glop, the integer programming solver
     solver = pywraplp.Solver('SolveIntegerProblem', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
 
@@ -52,7 +53,9 @@ def optimize():
     #we want a variable for each possible student class pairing
     for std in range(0, num_students):
         mat.append([])
+        print("student", std)
         for class_num in range(0, num_classes):
+            # print("class", class_num)
             mat[std].append([])
             #if(variable is in the right ranked choice for the student, let it take on a 1 value)
             choice_num = 0
@@ -62,7 +65,7 @@ def optimize():
                     mat[std][class_num].append(solver.IntVar(0.0, 1.0, str(std)+" "+str(class_num) +" "+ str(choice_num)))
                 else:
                     mat[std][class_num].append(None)
-       
+        # print(mat)
     
 
     #####################CONSTRAINT 1, STUDENT CLASSES FROM 2 to 4 ###########################
@@ -101,14 +104,19 @@ def optimize():
     
 
     #####################CONSTRAINT 3, COURSES MUST COME FROM SAME WT 'CHOICE' ####################
-    #constraint that the four courses must come from the same webtree "selection"
-    sel_constraint = []
-    #for all lists k /sum_{i = 0} ^{num_students}, _j=0^{num_classes}
-    for std in range(num_students):
-        sel_constraint.append(solver.Constraint(4,4))
-        for choice in range(WT_CHOICE_LEN):
-            if mat[std][class_num][choice] is not None:
-                sel_constraint[dep].SetCoefficient(mat[row][col][dep], 1.0)
+    # #constraint that the four courses must come from the same webtree "selection"
+#     sel_constraint = []
+#     #for all lists k /sum_{i = 0} ^{num_students}, _j=0^{num_classes}
+#     for std in range(num_students):
+#         sel_constraint.append(solver.Constraint(4,4))
+#         for class_num in range(num_classes):
+#             for choice in range(WT_CHOICE_LEN):
+#                 if mat[std][class_num][choice] is not None:
+#                     a1 = mat[std]
+#                     a2 = a1[class_num]
+#                     a3 = a2[choice]
+#                     # a4 = sel_constraint[dep]
+#                     sel_constraint[dep].SetCoefficient(mat[std][class_num][choice], 1.0)
         
     
     # Make objective function
@@ -126,7 +134,6 @@ def optimize():
     
     """Solve the problem and print the solution."""
     result_status = solver.Solve()
-    print ('henlo')  
     # The problem has an optimal solution.
     #assert result_status == pywraplp.Solver.OPTIMAL
 
@@ -149,15 +156,16 @@ def optimize():
         for col in range(len(mat[0])):
             for dep in range(WT_CHOICE_LEN):
                 variable = mat[row][col][dep]
-                split = variable.name().split()
-                name = int(split[0])+1
-                course_index = int(split[1])
-                val = variable.solution_value()
-                if val:
-                    if name in assignments:
-                        assignments[name].add(course_crns[course_index])
-                    else:
-                        assignments[name] = set([course_crns[course_index]])
+                if variable:
+                    val = variable.solution_value()
+                    if val:
+                        split = variable.name().split()
+                        name = int(split[0])+1
+                        course_index = int(split[1])
+                        if name in assignments:
+                            assignments[name].add(course_crns[course_index])
+                        else:
+                            assignments[name] = set([course_crns[course_index]])
     #a dictionary from student ids to four courses they're assigned
     return assignments
 
@@ -170,7 +178,7 @@ def weight(student, class_crn):
     for four_classes in ranked[student]:
         if class_crn in four_classes:
             found = True
-            score += (len(ranked[student]) - ranked[student].index(four_classes)) * ( - four_classes.index(class_crn))
+            score += (len(ranked[student]) - ranked[student].index(four_classes)) * (4 - four_classes.index(class_crn))
             break
     if not found:
         score -= 10000
