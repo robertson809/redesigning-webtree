@@ -46,7 +46,7 @@ def optimize():
         for row in range(len(mat)):
             constraints[shift+col].SetCoefficient(mat[row][col], 1.0)
             
-    #constraint that the four courses must come from the same webtree "selection"
+
     
     # Make objective function
     objective = solver.Objective()
@@ -57,7 +57,6 @@ def optimize():
             #we need to find the year and the major
             objective.SetCoefficient(mat[row][col], weight(student_ids[row], course_crns[col]))
     objective.SetMaximization()
-
 
     """Solve the problem and print the solution."""
     result_status = solver.Solve()
