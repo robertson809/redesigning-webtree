@@ -2,6 +2,9 @@
 
 ## George Baldini and Michael Robertson
 
+Requires ORtools
+
+
 ```
 {gebaldini,mirobertson}@davidson.edu
 Davidson College
