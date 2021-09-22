@@ -1,8 +1,28 @@
 from __future__ import print_function
 from ortools.linear_solver import pywraplp
 from baseline_webtree import read_file, student_choices
+import sys
+from os import path
 
-student_requests, students_by_class, courses, course_major, student_major = read_file('../data/fall-2013.csv')
+
+if (len(sys.argv) != 2):
+    print()
+    print ("***********************************************************")
+    print ("You need to supply a .csv file containing the WebTree data")
+    print ("as a command-line argument.")
+    print()
+    print ("Example:")
+    print ("    python baseline_webtree.py spring-2015.csv")
+    print ("***********************************************************")
+    print()
+    exit()
+
+if path.exists('../data/' + sys.argv[1]): filename = '../data/' + sys.argv[1]
+elif path.exists('data/'+ sys.argv[1]): filename = 'data/'+ sys.argv[1]
+else: filename = sys.argv[1]
+    
+student_requests, students_by_class, courses, course_major, student_major = read_file(filename)
+
 num_students = len(student_requests)
 num_classes = len(courses)
 
@@ -14,6 +34,7 @@ student_ids = list(student_requests.keys())
 course_crns = list(courses.keys())
 
 def main():
+
     optimize()
 def optimize():
     solver = pywraplp.Solver('SolveIntegerProblem', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
@@ -73,11 +94,7 @@ def optimize():
     # The objective value of the solution.
     print('Optimal objective value = %d' % solver.Objective().Value())
     print()
-    # The value of each variable in the solution.
-    # variable_list = [x, y]
-    #
-    # for variable in variable_list:
-    #     print('%s = %d' % (variable.name(), variable.solution_value()))
+    
 
     #dictionary from student id to four courses they're assigned
     assignments = {}
@@ -94,18 +111,17 @@ def optimize():
                 else:
                     assignments[name] = set([course_crns[course_index]])
 
-    # Print course assignments
-    # for s in assignments:
-    #     print(s, list(assignments[s]))
-
     first_choices = 0
     for s in assignments.keys():
         if ranked[s][0][0] in list(assignments[s]):
             first_choices += 1
-    print("First Choices")
-    print(first_choices, num_students, float(first_choices)/num_students)
+    print("First Choices:")
+    percentage = float(first_choices)/num_students
+    print(round(100 * percentage,1), '% of students got their first choice:', first_choices,'out of',
+    num_students)
+ 
     
-    #a dictionary from student ids to four courses they're assigned
+    # a dictionary from student ids to four courses they're assigned
     return assignments
 
     
