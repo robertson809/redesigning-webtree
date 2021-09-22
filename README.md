@@ -11,6 +11,7 @@ By Michael Robertson and George Baldini for Davidson College's Machine Reasoning
 - [Results](#results)
 - [Conclusions](#conclusions)
 - [Contributions](#contributions)
+- [Acknowledgements](#acknowledgements)
 - [References](#references)
 
 
