@@ -12,7 +12,9 @@ if (len(sys.argv) != 2):
     print ("as a command-line argument.")
     print()
     print ("Example:")
-    print ("    python baseline_webtree.py spring-2015.csv")
+    print ("    python new_webtree.py spring-2015.csv")
+    print()
+    print ("A full list of .csv files can be found in the data folder")
     print ("***********************************************************")
     print()
     exit()
@@ -37,6 +39,7 @@ def main():
 
     optimize()
 def optimize():
+    print('Modeling the problem...')
     solver = pywraplp.Solver('SolveIntegerProblem', pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
 
     #mat is a list of lists (2d matrix) of all the possible student class pairings
@@ -80,6 +83,8 @@ def optimize():
     objective.SetMaximization()
 
     """Solve the problem and print the solution."""
+    print("Solving the problem...")
+    print()
     result_status = solver.Solve()
     # The problem has an optimal solution.
     assert result_status == pywraplp.Solver.OPTIMAL
@@ -115,7 +120,10 @@ def optimize():
     for s in assignments.keys():
         if ranked[s][0][0] in list(assignments[s]):
             first_choices += 1
-    print("First Choices:")
+    print("Solution Generated")
+    print ("***********************************************************")
+    print()
+    print("First Choice Measure:")
     percentage = float(first_choices)/num_students
     print(round(100 * percentage,1), '% of students got their first choice:', first_choices,'out of',
     num_students)
