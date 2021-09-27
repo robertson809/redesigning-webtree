@@ -4,7 +4,7 @@ To run a demo, install package dependencies from the Pipfile and run "new_webtre
 
 # Redesigning WebTree
 
-By Michael Robertson and George Baldini for Davidson College's Machine Reasoning HW4
+By Michael Robertson and George Baldini for Davidson College's Machine Reasoning Homework 4
 
 
 ### Table of Contents:
