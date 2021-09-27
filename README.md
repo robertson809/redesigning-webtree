@@ -1,3 +1,7 @@
+# Demo
+To run a demo, install package dependencies from the Pipfile and run "new_webtree.py" with one .csv file from the data folder as a command line arguement.
+
+
 # Redesigning WebTree
 
 By Michael Robertson and George Baldini for Davidson College's Machine Reasoning HW4
